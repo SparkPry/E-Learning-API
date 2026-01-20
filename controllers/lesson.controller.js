@@ -1,0 +1,147 @@
+const db = require("../db");
+// Constructor add lessons
+exports.addLesson = (req, res) => {
+  if (req.user.role !== "instructor") {
+    return res
+      .status(403)
+      .json({ message: "Only instructors can add lessons" });
+  }
+
+  const { title, video_url, content } = req.body;
+  const courseId = req.params.courseId;
+
+  const sql = `
+    INSERT INTO lessons (course_id, title, video_url, content)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(sql, [courseId, title, video_url, content], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Lesson added successfully" });
+  });
+};
+
+exports.getLessons = (req, res) => {
+  const courseId = req.params.courseId;
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  // Instructor can see all lessons
+  if (role === "instructor") {
+    return getLessonsWithProgress(courseId, null, res);
+  }
+
+  // Student: check enrollment first
+  const checkSql = `
+    SELECT * FROM enrollments
+    WHERE student_id = ? AND course_id = ?
+  `;
+
+  db.query(checkSql, [userId, courseId], (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    if (result.length === 0) {
+      return res.status(403).json({
+        message: "You must enroll to view lessons"
+      });
+    }
+
+    getLessonsWithProgress(courseId, userId, res);
+  });
+};
+
+// helper
+function getLessonsWithProgress(courseId, studentId, res) {
+  let sql;
+  let params;
+
+  if (studentId) {
+    sql = `
+      SELECT l.id, l.title, l.video_url, l.content,
+             IF(lp.completed = 1, 1, 0) AS completed
+      FROM lessons l
+      LEFT JOIN lesson_progress lp
+        ON l.id = lp.lesson_id AND lp.student_id = ?
+      WHERE l.course_id = ?
+    `;
+    params = [studentId, courseId];
+  } else {
+    sql = "SELECT * FROM lessons WHERE course_id = ?";
+    params = [courseId];
+  }
+
+  db.query(sql, params, (err, lessons) => {
+    if (err) return res.status(500).json(err);
+    res.json(lessons);
+  });
+}
+
+
+
+
+
+//  Make the lesson Completed
+exports.markLessonComplete = (req, res) => {
+  if (req.user.role !== "student") {
+    return res.status(403).json({ message: "Students only" });
+  }
+
+  const studentId = req.user.id;
+  const lessonId = req.params.lessonId;
+
+  const sql = `
+    INSERT INTO lesson_progress (student_id, lesson_id, completed, completed_at)
+    VALUES (?, ?, 1, NOW())
+  `;
+
+  db.query(sql, [studentId, lessonId], (err) => {
+    if (err) return res.status(500).json(err);
+
+    res.json({ message: "Lesson marked as completed" });
+
+    checkCourseCompletion(studentId, lessonId);
+
+
+  });
+};
+
+
+const checkCourseCompletion = (studentId, lessonId) => {
+  // get course_id from lesson
+  const courseSql = "SELECT course_id FROM lessons WHERE id = ?";
+  db.query(courseSql, [lessonId], (err, lessonResult) => {
+    if (err || lessonResult.length === 0) return;
+
+    const courseId = lessonResult[0].course_id;
+
+    // count total lessons
+    const totalSql = "SELECT COUNT(*) AS total FROM lessons WHERE course_id = ?";
+    db.query(totalSql, [courseId], (err, totalResult) => {
+      if (err) return;
+
+      const totalLessons = totalResult[0].total;
+
+      // count completed lessons
+      const completedSql = `
+        SELECT COUNT(*) AS completed
+        FROM lesson_progress
+        WHERE student_id = ? AND lesson_id IN (
+          SELECT id FROM lessons WHERE course_id = ?
+        )
+      `;
+
+      db.query(completedSql, [studentId, courseId], (err, completedResult) => {
+        if (err) return;
+
+        if (completedResult[0].completed === totalLessons) {
+          const insertSql = `
+            INSERT IGNORE INTO course_completion (student_id, course_id)
+            VALUES (?, ?)
+          `;
+          db.query(insertSql, [studentId, courseId]);
+        }
+      });
+    });
+  });
+};
+
