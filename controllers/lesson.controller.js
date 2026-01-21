@@ -7,11 +7,11 @@ exports.addLesson = (req, res) => {
       .json({ message: "Only instructors can add lessons" });
   }
 
-  const { slug, title, content_type, content_url, duration, lesson_order, is_free } = req.body;
+  const { slug, title, content_type, content, duration, lesson_order, is_free } = req.body;
   const courseId = req.params.courseId;
 
   const sql = `
-    INSERT INTO lessons (course_id, slug, title, content_type, content_url, duration, lesson_order, is_free)
+    INSERT INTO lessons (course_id, slug, title, content_type, content, duration, lesson_order, is_free)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
@@ -22,7 +22,7 @@ exports.addLesson = (req, res) => {
       slug || null,
       title || null,
       content_type || null,
-      content_url || null,
+      content || null,
       duration || null,
       lesson_order || 0,
       is_free || false
