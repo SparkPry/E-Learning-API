@@ -9,29 +9,41 @@ exports.addLesson = (req, res) => {
 
   const { slug, title, content_type, content, duration, lesson_order, is_free } = req.body;
   const courseId = req.params.courseId;
+  const instructorId = req.user.id;
 
-  const sql = `
-    INSERT INTO lessons (course_id, slug, title, content_type, content, duration, lesson_order, is_free)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+  // Verify course exists and instructor owns it
+  const verifySql = "SELECT id FROM courses WHERE id = ? AND instructor_id = ?";
+  
+  db.query(verifySql, [courseId, instructorId], (err, result) => {
+    if (err) return res.status(500).json(err);
 
-  db.query(
-    sql,
-    [
-      courseId,
-      slug || null,
-      title || null,
-      content_type || null,
-      content || null,
-      duration || null,
-      lesson_order || 0,
-      is_free || false
-    ],
-    (err, result) => {
-      if (err) return res.status(500).json(err);
-      res.json({ message: "Lesson added successfully", lessonId: result.insertId });
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Course not found or you don't have permission to add lessons" });
     }
-  );
+
+    const sql = `
+      INSERT INTO lessons (course_id, slug, title, content_type, content, duration, lesson_order, is_free)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      sql,
+      [
+        courseId,
+        slug || null,
+        title || null,
+        content_type || null,
+        content || null,
+        duration || null,
+        lesson_order || 0,
+        is_free || false
+      ],
+      (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Lesson added successfully", lessonId: result.insertId });
+      }
+    );
+  });
 };
 
 exports.getLessons = (req, res) => {
