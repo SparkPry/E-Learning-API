@@ -112,6 +112,8 @@ exports.updateCourse = (req, res) => {
     return res.status(403).json({ message: "Only instructors and admins can update courses" });
   }
 
+  const courseId = req.params.courseId;
+
   const {
     title,
     description,
