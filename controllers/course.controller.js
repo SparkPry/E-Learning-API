@@ -108,18 +108,53 @@ exports.getCertificate = (req, res) => {
 
 // UPDATE COURSE
 exports.updateCourse = (req, res) => {
-  const { title, description, price } = req.body;
-  const courseId = req.params.courseId;
-
-  if (!title || !price) {
-    return res.status(400).json({ message: "Title and price required" });
+  if (req.user.role !== "instructor" && req.user.role !== "admin") {
+    return res.status(403).json({ message: "Only instructors and admins can update courses" });
   }
 
-  const sql = "UPDATE courses SET title = ?, description = ?, price = ? WHERE id = ?";
-  db.query(sql, [title, description, price, courseId], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Course updated successfully" });
-  });
+  const {
+    title,
+    description,
+    long_description,
+    price,
+    discount_price,
+    level,
+    category,
+    language,
+    duration,
+    thumbnail,
+    slug,
+    status
+  } = req.body;
+
+  const sql = `
+    UPDATE courses
+    SET title = ?, description = ?, long_description = ?, price = ?, discount_price = ?, level = ?, category = ?, language = ?, duration = ?, thumbnail = ?, slug = ?, status = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    sql,
+    [
+      title || null,
+      description || null,
+      long_description || null,
+      price || 0,
+      discount_price || null,
+      level || null,
+      category || null,
+      language || null,
+      duration || null,
+      thumbnail || null,
+      slug || null,
+      status || "draft",
+      courseId
+    ],
+    (err) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Course updated successfully" });
+    }
+  );
 };
 
 // DELETE COURSE

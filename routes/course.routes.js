@@ -83,6 +83,7 @@ const { getCertificate } = require("../controllers/course.controller");
 
 const {
   createCourse,
+  updateCourse,
   getAllCourses,
   getCourseById,
   deleteCourse
@@ -96,6 +97,7 @@ router.get("/:id", getCourseById);
 // GET certificate for a course
 router.get("/:courseId/certificate", verifyToken, getCertificate);
 
+router.put("/:courseId", verifyToken, isInstructorOrAdmin, updateCourse);
 
 
 // Protected (instructor/admin)
