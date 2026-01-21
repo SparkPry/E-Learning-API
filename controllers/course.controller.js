@@ -30,14 +30,14 @@ exports.createCourse = (req, res) => {
     return res.status(403).json({ message: "Only instructors can create courses" });
   }
 
-  const { title, description, price } = req.body;
+  const { title, description, price, slug } = req.body;
 
   const sql = `
-    INSERT INTO courses (title, description, price, instructor_id)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO courses ( slug, title, description, price, instructor_id)
+    VALUES (?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [title, description, price, req.user.id], (err) => {
+  db.query(sql, [slug, title, description, price, req.user.id], (err) => {
     if (err) return res.status(500).json(err);
     res.json({ message: "Course created successfully" });
   });
