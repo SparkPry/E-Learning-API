@@ -106,6 +106,41 @@ exports.markLessonComplete = (req, res) => {
 };
 
 
+exports.deleteLesson = (req, res) => {
+  if (req.user.role !== "instructor") {
+    return res
+      .status(403)
+      .json({ message: "Only instructors can delete lessons" });
+  }
+
+  const lessonId = req.params.lessonId;
+  const courseId = req.params.courseId;
+
+  // Verify the lesson belongs to the specified course
+  const verifySql = "SELECT id FROM lessons WHERE id = ? AND course_id = ?";
+  
+  db.query(verifySql, [lessonId, courseId], (err, result) => {
+    if (err) return res.status(500).json(err);
+    
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Lesson not found in this course" });
+    }
+
+    // Delete lesson progress records first
+    const deleteProgressSql = "DELETE FROM lesson_progress WHERE lesson_id = ?";
+    db.query(deleteProgressSql, [lessonId], (err) => {
+      if (err) return res.status(500).json(err);
+
+      // Delete the lesson
+      const deleteSql = "DELETE FROM lessons WHERE id = ?";
+      db.query(deleteSql, [lessonId], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ message: "Lesson deleted successfully" });
+      });
+    });
+  });
+};
+
 const checkCourseCompletion = (studentId, lessonId) => {
   // get course_id from lesson
   const courseSql = "SELECT course_id FROM lessons WHERE id = ?";

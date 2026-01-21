@@ -21,7 +21,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api",
+        url: "https://e-learning-api-production-a6d4.up.railway.app",
       },
     ],
   },

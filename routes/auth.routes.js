@@ -4,7 +4,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /auth/login:
+ * /api/auth/login:
  *   post:
  *     summary: Login user
  *     tags: [Auth]
@@ -26,6 +26,38 @@ const router = express.Router();
  *         description: Login successful
  */
 
+
+
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: register user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                type: string
+ *                example: Joe deo
+ *               email:
+ *                 type: string
+ *                 example: user@gmail.com
+ *               password:
+ *                 type: string
+ *                 example: 123456
+ *               role:
+ *                type: string
+ *                example: Student
+ *     responses:
+ *       200:
+ *         description: Register Succesful
+ */
 const {
   register,
   login

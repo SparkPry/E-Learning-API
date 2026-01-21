@@ -8,7 +8,7 @@ const { getCertificate } = require("../controllers/course.controller");
 
 /**
  * @swagger
- * /courses:
+ * api/courses:
  *   post:
  *     summary: Create a course
  *     tags: [Courses]
@@ -34,6 +34,49 @@ const { getCertificate } = require("../controllers/course.controller");
  *       200:
  *         description: Course created
  */
+
+
+/**
+ * @swagger
+ * /api/courses:
+ *   get:
+ *     summary: Get all courses
+ *     tags:
+ *       - Courses
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   title:
+ *                     type: string
+ *                     example: JavaScript Basics
+ *                   description:
+ *                     type: string
+ *                     example: Learn JS fundamentals
+ *                   price:
+ *                     type: string
+ *                     example: "19.99"
+ *                   instructor_id:
+ *                     type: integer
+ *                     nullable: true
+ *                     example: 7
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                     example: 2026-01-17T05:22:30.000Z
+ *       500:
+ *         description: Server error
+ */
+
 
 
 
