@@ -7,18 +7,31 @@ exports.addLesson = (req, res) => {
       .json({ message: "Only instructors can add lessons" });
   }
 
-  const { title, video_url, content, order } = req.body;
+  const { slug, title, content_type, content_url, duration, lesson_order, is_free } = req.body;
   const courseId = req.params.courseId;
 
   const sql = `
-    INSERT INTO lessons (course_id, title, video_url, content, order)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO lessons (course_id, slug, title, content_type, content_url, duration, lesson_order, is_free)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [courseId, title || null, video_url || null, content || null, order || 0], (err, result) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Lesson added successfully", lessonId: result.insertId });
-  });
+  db.query(
+    sql,
+    [
+      courseId,
+      slug || null,
+      title || null,
+      content_type || null,
+      content_url || null,
+      duration || null,
+      lesson_order || 0,
+      is_free || false
+    ],
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Lesson added successfully", lessonId: result.insertId });
+    }
+  );
 };
 
 exports.getLessons = (req, res) => {
