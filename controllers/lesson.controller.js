@@ -130,7 +130,7 @@ exports.deleteLesson = (req, res) => {
   const courseId = req.params.courseId;
 
   // Verify the lesson belongs to the specified course
-  const verifySql = "SELECT l.id FROM lessons l INNER JOIN courses c ON l.course_id = c.id WHERE l.id = ? AND l.course_id = ?";
+  const verifySql = "SELECT id, course_id FROM lessons WHERE id = ? AND course_id = ?";
   
   db.query(verifySql, [lessonId, courseId], (err, result) => {
     if (err) return res.status(500).json(err);
@@ -141,8 +141,8 @@ exports.deleteLesson = (req, res) => {
 
     // If instructor, verify ownership
     if (req.user.role === "instructor") {
-      const ownershipSql = "SELECT c.instructor_id FROM lessons l INNER JOIN courses c ON l.course_id = c.id WHERE l.id = ? AND c.instructor_id = ?";
-      db.query(ownershipSql, [lessonId, req.user.id], (err, ownerResult) => {
+      const ownershipSql = "SELECT c.id FROM courses c WHERE c.id = ? AND c.instructor_id = ?";
+      db.query(ownershipSql, [courseId, req.user.id], (err, ownerResult) => {
         if (err) return res.status(500).json(err);
         
         if (ownerResult.length === 0) {
