@@ -107,17 +107,17 @@ exports.markLessonComplete = (req, res) => {
 
 
 exports.deleteLesson = (req, res) => {
-  if (req.user.role !== "instructor") {
+  if (req.user.role !== "instructor" && req.user.role !== "admin") {
     return res
       .status(403)
-      .json({ message: "Only instructors can delete lessons" });
+      .json({ message: "Only instructors and admins can delete lessons" });
   }
 
   const lessonId = req.params.lessonId;
   const courseId = req.params.courseId;
 
   // Verify the lesson belongs to the specified course
-  const verifySql = "SELECT id FROM lessons WHERE id = ? AND course_id = ?";
+  const verifySql = "SELECT l.id FROM lessons l INNER JOIN courses c ON l.course_id = c.id WHERE l.id = ? AND l.course_id = ?";
   
   db.query(verifySql, [lessonId, courseId], (err, result) => {
     if (err) return res.status(500).json(err);
@@ -126,6 +126,25 @@ exports.deleteLesson = (req, res) => {
       return res.status(404).json({ message: "Lesson not found in this course" });
     }
 
+    // If instructor, verify ownership
+    if (req.user.role === "instructor") {
+      const ownershipSql = "SELECT c.instructor_id FROM lessons l INNER JOIN courses c ON l.course_id = c.id WHERE l.id = ? AND c.instructor_id = ?";
+      db.query(ownershipSql, [lessonId, req.user.id], (err, ownerResult) => {
+        if (err) return res.status(500).json(err);
+        
+        if (ownerResult.length === 0) {
+          return res.status(403).json({ message: "You can only delete lessons from your own courses" });
+        }
+
+        deleteThisLesson();
+      });
+    } else {
+      // Admin can delete any lesson
+      deleteThisLesson();
+    }
+  });
+
+  function deleteThisLesson() {
     // Delete lesson progress records first
     const deleteProgressSql = "DELETE FROM lesson_progress WHERE lesson_id = ?";
     db.query(deleteProgressSql, [lessonId], (err) => {
@@ -138,7 +157,7 @@ exports.deleteLesson = (req, res) => {
         res.json({ message: "Lesson deleted successfully" });
       });
     });
-  });
+  }
 };
 
 const checkCourseCompletion = (studentId, lessonId) => {

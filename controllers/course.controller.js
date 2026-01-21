@@ -93,13 +93,65 @@ exports.updateCourse = (req, res) => {
 
 // DELETE COURSE
 exports.deleteCourse = (req, res) => {
+  if (req.user.role !== "instructor" && req.user.role !== "admin") {
+    return res.status(403).json({ message: "Only instructors and admins can delete courses" });
+  }
+
   const courseId = req.params.courseId;
 
-  const sql = "DELETE FROM courses WHERE id = ?";
-  db.query(sql, [courseId], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Course deleted successfully" });
-  });
+  // If instructor, verify course ownership
+  if (req.user.role === "instructor") {
+    const verifySql = "SELECT id FROM courses WHERE id = ? AND instructor_id = ?";
+    db.query(verifySql, [courseId, req.user.id], (err, result) => {
+      if (err) return res.status(500).json(err);
+      
+      if (result.length === 0) {
+        return res.status(403).json({ message: "You can only delete your own courses" });
+      }
+
+      deleteThisCourse();
+    });
+  } else {
+    // Admin can delete any course
+    deleteThisCourse();
+  }
+
+  function deleteThisCourse() {
+    // Delete lesson progress records
+    const deleteProgressSql = `
+      DELETE lp FROM lesson_progress lp
+      INNER JOIN lessons l ON lp.lesson_id = l.id
+      WHERE l.course_id = ?
+    `;
+    db.query(deleteProgressSql, [courseId], (err) => {
+      if (err) return res.status(500).json(err);
+
+      // Delete enrollments
+      const deleteEnrollmentsSql = "DELETE FROM enrollments WHERE course_id = ?";
+      db.query(deleteEnrollmentsSql, [courseId], (err) => {
+        if (err) return res.status(500).json(err);
+
+        // Delete course completion records
+        const deleteCompletionSql = "DELETE FROM course_completion WHERE course_id = ?";
+        db.query(deleteCompletionSql, [courseId], (err) => {
+          if (err) return res.status(500).json(err);
+
+          // Delete lessons
+          const deleteLessonsSql = "DELETE FROM lessons WHERE course_id = ?";
+          db.query(deleteLessonsSql, [courseId], (err) => {
+            if (err) return res.status(500).json(err);
+
+            // Delete the course
+            const deleteCourseSql = "DELETE FROM courses WHERE id = ?";
+            db.query(deleteCourseSql, [courseId], (err) => {
+              if (err) return res.status(500).json(err);
+              res.json({ message: "Course deleted successfully" });
+            });
+          });
+        });
+      });
+    });
+  }
 };
 
 // CREATE LESSON (Admin)

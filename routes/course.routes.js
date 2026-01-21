@@ -84,7 +84,8 @@ const { getCertificate } = require("../controllers/course.controller");
 const {
   createCourse,
   getAllCourses,
-  getCourseById
+  getCourseById,
+  deleteCourse
 } = require("../controllers/course.controller");
 
 // Public (students can view)
@@ -99,5 +100,8 @@ router.get("/:courseId/certificate", verifyToken, getCertificate);
 
 // Protected (instructor/admin)
 router.post("/", verifyToken, isInstructorOrAdmin, createCourse);
+
+// Instructor deletes their course
+router.delete("/:courseId", verifyToken, deleteCourse);
 
 module.exports = router;
