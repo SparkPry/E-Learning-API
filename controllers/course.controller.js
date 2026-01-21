@@ -30,17 +30,48 @@ exports.createCourse = (req, res) => {
     return res.status(403).json({ message: "Only instructors can create courses" });
   }
 
-  const { title, description, price, slug } = req.body;
+  const {
+    title,
+    description,
+    long_description,
+    price,
+    discount_price,
+    level,
+    category,
+    language,
+    duration,
+    thumbnail,
+    slug,
+    status
+  } = req.body;
 
   const sql = `
-    INSERT INTO courses ( slug, title, description, price, instructor_id)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO courses (slug, title, description, long_description, price, discount_price, level, category, language, duration, thumbnail, instructor_id, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [slug, title, description, price, req.user.id], (err) => {
-    if (err) return res.status(500).json(err);
-    res.json({ message: "Course created successfully" });
-  });
+  db.query(
+    sql,
+    [
+      slug || null,
+      title || null,
+      description || null,
+      long_description || null,
+      price || 0,
+      discount_price || null,
+      level || null,
+      category || null,
+      language || null,
+      duration || null,
+      thumbnail || null,
+      req.user.id,
+      status || "draft"
+    ],
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Course created successfully", courseId: result.insertId });
+    }
+  );
 };
 
 
