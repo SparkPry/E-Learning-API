@@ -86,11 +86,13 @@ const {
   updateCourse,
   getAllCourses,
   getCourseById,
+  getCourseBySlug,
   deleteCourse
 } = require("../controllers/course.controller");
 
 // Public (students can view)
 router.get("/", getAllCourses);
+router.get("/slug/:slug", getCourseBySlug);
 router.get("/:id", getCourseById);
 
 

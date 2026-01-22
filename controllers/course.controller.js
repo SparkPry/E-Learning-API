@@ -24,6 +24,23 @@ exports.getCourseById = (req, res) => {
     }
   );
 };
+
+// GET COURSE BY SLUG
+exports.getCourseBySlug = (req, res) => {
+  const slug = req.params.slug;
+
+  db.query(
+    "SELECT * FROM courses WHERE slug = ?",
+    [slug],
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      if (result.length === 0)
+        return res.status(404).json({ message: "Course not found" });
+
+      res.json(result[0]);
+    }
+  );
+};
 //  Create Course 
 exports.createCourse = (req, res) => {
   if (req.user.role !== "instructor") {
