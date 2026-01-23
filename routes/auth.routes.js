@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middlewares/auth.middleware");
-const db = require("../db");
+// const db = require("../db");
 
 /**
  * @swagger
@@ -69,14 +69,14 @@ router.post("/login", login);
 
 
 // ✅ CURRENT USER
-router.get("/me", verifyToken, async (req, res) => {
-  const [rows] = await db.query(
-    "SELECT id, name, email, role FROM users WHERE id = ?",
-    [req.user.id]
-  );
+// router.get("/me", verifyToken, async (req, res) => {
+//   const [rows] = await db.query(
+//     "SELECT id, name, email, role FROM users WHERE id = ?",
+//     [req.user.id]
+//   );
 
-  res.json(rows[0]);
-});
+//   res.json(rows[0]);
+// });
 
 
 module.exports = router;
