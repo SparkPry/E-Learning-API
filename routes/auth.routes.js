@@ -70,13 +70,23 @@ router.post("/login", login);
 
 // ✅ CURRENT USER
 router.get("/me", verifyToken, async (req, res) => {
-  const [rows] = await db.query(
-    "SELECT id, name, email, role FROM users WHERE id = ?",
-    [req.user.id]
-  );
+  try {
+    const [rows] = await db.query(
+      "SELECT id, name, email, role FROM users WHERE id = ?",
+      [req.user.id]
+    );
 
-  res.json(rows[0]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("ME ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 
 module.exports = router;
