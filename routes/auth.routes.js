@@ -61,14 +61,15 @@ const { verifyToken } = require("../middlewares/auth.middleware");
  */
 const {
   register,
-  login
+  login,
+  getProfile
 } = require("../controllers/auth.controller");
 
 router.post("/register", register);
 router.post("/login", login);
 
 
-router.get("/me", verifyToken, authController.me);
+router.get("/me", verifyToken, getProfile);
 
 
 
