@@ -69,7 +69,7 @@ router.post("/register", register);
 router.post("/login", login);
 
 
-router.get("/me", verifyToken, getProfile);
+router.get("/profile", verifyToken, getProfile);
 
 
 

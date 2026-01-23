@@ -64,9 +64,12 @@ exports.login = (req, res) => {
   });
 };
 
-exports.me = async (req, res) => {
-  const [rows] = await db.query(
-    "SELECT id, name, email, role FROM users WHERE id = ?",
-    [req.user.id]
-  );
+// GET PROFILE
+exports.getProfile = (req, res) => {
+  const userId = req.user.id;
+  const sql = "SELECT id, name, email, role FROM users WHERE id = ?";
+  db.query(sql, [userId], (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result[0]);
+  });
 };
