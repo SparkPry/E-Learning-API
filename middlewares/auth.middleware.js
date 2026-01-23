@@ -9,12 +9,10 @@ exports.verifyToken = (req, res, next) => {
 
   const token = authHeader.split(" ")[1];
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: "Invalid token" });
-    }
+  jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+    if (err) return res.status(401).json({ message: "Invalid token" });
 
-    req.user = decoded;
+    req.user = payload; // { id, role }
     next();
   });
 };
