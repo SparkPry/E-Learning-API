@@ -68,15 +68,8 @@ router.post("/register", register);
 router.post("/login", login);
 
 
-// ✅ CURRENT USER
-// router.get("/me", verifyToken, async (req, res) => {
-//   const [rows] = await db.query(
-//     "SELECT id, name, email, role FROM users WHERE id = ?",
-//     [req.user.id]
-//   );
+router.get("/me", verifyToken, authController.me);
 
-//   res.json(rows[0]);
-// });
 
 
 module.exports = router;

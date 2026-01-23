@@ -63,3 +63,16 @@ exports.login = (req, res) => {
     });
   });
 };
+
+exports.me = async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      "SELECT id, name, email, role FROM users WHERE id = ?",
+      [req.user.id]
+    );
+
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
