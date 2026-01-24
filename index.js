@@ -8,7 +8,6 @@ const enrollmentRoutes = require("./routes/enrollment.routes");
 const lessonRoutes = require("./routes/lesson.routes");
 const adminRoutes = require("./routes/admin.routes");
 const studentRoutes = require("./routes/student.routes");
-
 const app = express();
 
 
@@ -21,6 +20,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api", lessonRoutes);
 app.use("/api/admin", adminRoutes);
+
 app.use("/api/student", studentRoutes);
 const swaggerSetup = require("./swagger");
 swaggerSetup(app);
