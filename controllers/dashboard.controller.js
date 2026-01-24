@@ -5,7 +5,7 @@ exports.getDashboard = async (req, res) => {
     const studentId = req.user.id;
 
     // 1️⃣ Enrolled courses
-    const [courses] = await db.query(
+    const [courses] = await db.promise().query(
       `SELECT e.course_id, c.title
        FROM enrollments e
        JOIN courses c ON c.id = e.course_id
@@ -14,7 +14,7 @@ exports.getDashboard = async (req, res) => {
     );
 
     // 2️⃣ Course progress
-    const [progressRows] = await db.query(
+    const [progressRows] = await db.promise().query(
       `SELECT
           l.course_id,
           COUNT(*) AS total_lessons,
@@ -54,7 +54,7 @@ exports.getDashboard = async (req, res) => {
           ).toFixed(1);
 
     // 4️⃣ Cards today
-    const [cardsTodayRow] = await db.query(
+    const [cardsTodayRow] = await db.promise().query(
       `SELECT COUNT(*) AS total
        FROM lesson_progress
        WHERE student_id = ?
@@ -65,7 +65,7 @@ exports.getDashboard = async (req, res) => {
     const cardsToday = cardsTodayRow[0].total;
 
     // 5️⃣ Streak
-    const [daysRows] = await db.query(
+    const [daysRows] = await db.promise().query(
       `SELECT DISTINCT DATE(completed_at) AS day
        FROM lesson_progress
        WHERE student_id = ?
