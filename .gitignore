@@ -27,3 +27,6 @@ yarn-debug.log*
 # Build
 dist/
 build/
+
+# Ignore security documentation
+SECURITY.md
