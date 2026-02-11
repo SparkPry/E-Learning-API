@@ -19,7 +19,7 @@ app.use(helmet());
 // Configure CORS - restrict to specific origin(s)
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000', 'http://localhost:3001','http://localhost:5173','https://sparkpry.github.io'];
+  : ['http://localhost:3000', 'http://localhost:3001','http://localhost:5173','https://sparkpry.github.io','https://academic-hub-delta-jet.vercel.app/'];
 
 app.use(cors({
   origin: allowedOrigins,
