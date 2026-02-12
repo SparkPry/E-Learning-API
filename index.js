@@ -17,12 +17,27 @@ const app = express();
 app.use(helmet());
 
 // Configure CORS - restrict to specific origin(s)
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000','http://localhost:3001','https://sparkpry.github.io'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+  : [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://sparkpry.github.io',
+      'https://academic-hub-delta-jet.vercel.app'
+    ];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+
+    // Allow requests with no origin (Postman, mobile apps, etc.)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
