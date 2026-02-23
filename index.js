@@ -22,6 +22,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : [
       'http://localhost:3000',
       'http://localhost:3001',
+      'http://localhost:5173',
       'https://sparkpry.github.io',
       'https://academic-hub-delta-jet.vercel.app'
     ];
@@ -43,6 +44,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.set("trust proxy", 1);
+
 // Rate limiting - prevent brute force attacks
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -52,7 +55,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit auth attempts to 5 per 15 minutes
+  max: 10, // limit auth attempts to 5 per 15 minutes
   message: 'Too many login attempts, please try again later.'
 });
 
